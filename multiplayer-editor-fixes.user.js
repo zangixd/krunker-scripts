@@ -76,7 +76,12 @@
   const openWin = window.open;
   window.open = (...args) => {
     const newWin = openWin(...args);
-    if (isHostingMap && localStorage.getItem('custToLoad') && newWin) {
+    if (
+      isHostingMap &&
+      window.KE.multiplayer.room &&
+      localStorage.getItem('custToLoad') &&
+      newWin
+    ) {
       isHostingMap = false;
       console.log('EditorFeatures: detected map hosting');
 
