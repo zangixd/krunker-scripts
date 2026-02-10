@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name        multiplayer-editor-player-fixes
-// @namespace   Violentmonkey Scripts
+// @namespace   https://github.com/zangixd/krunker-scripts
 // @match       https://krunker.io/editor.html*
 // @grant       none
 // @version     1.1
-// @author      -
+// @author      github.com/zangixd
 // @description 09/02/2026, 22:11:38
 // @require     https://unpkg.com/three@0.140.0/build/three.min.js
 // @require     https://unpkg.com/three@0.140.0/examples/js/loaders/OBJLoader.js
