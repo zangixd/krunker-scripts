@@ -3,7 +3,7 @@
 // @namespace   https://github.com/zangixd/krunker-scripts
 // @match       https://krunker.io/editor.html*
 // @grant       unsafeWindow
-// @version     1.1
+// @version     1.2
 // @author      github.com/zangixd
 // @description 09/02/2026, 22:11:38
 // @require     https://unpkg.com/three@0.140.0/build/three.min.js
@@ -257,7 +257,7 @@
             joinThisButton.onclick = () => {
               window.open('https://krunker.io/?game=' + SplitMapID.join(':'));
             };
-            
+
           }
 
         }
