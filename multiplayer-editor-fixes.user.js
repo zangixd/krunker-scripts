@@ -14,14 +14,23 @@
 (function (window) {
   'use strict';
 
-  const joinButtonStyle = `
-    width: fit-content;
-    height: fit-content;
-    background: #db00db;
-    margin-left: 10px;
-    margin-top: 0;
-    margin-bottom: 0;
-    transform: scale(0.9);
+  const css = `
+    .joinButton {
+      width: fit-content;
+      height: fit-content;
+      background: #db00db;
+      margin-left: 10px;
+      margin-top: 0;
+      margin-bottom: 0;
+      transform: scale(0.9);
+    }
+
+    .vector3 input[type=text] {
+      padding:4px;
+      border-radius:4px;
+      font-size:10px;
+      background-color:#bbb
+    }
   `;
 
   const hookGetter = (object, propertyName, setter) => {
@@ -229,15 +238,39 @@
     return instance;
   }
 
-  // add the Join button to 'hosted map' chat messages
-  window.document.addEventListener('DOMContentLoaded', () => {
-    const chatList = window.document.getElementById('mp-chat-list');
+  // patches GUI input handler
+  function patchInputUpdateHandler() {
+    if (!(
+      GUI &&
+      GUI.update &&
+      GUI.update.number && 
+      GUI.update.number.change
+    )) return console.log('EditorFeatures Error: GUI not yet initialized/ready');
 
-    const observer = new MutationObserver(() => {
+    GUI.update.number.change = (el) => {
+        if (el.value === '') el.value = 0;
+        
+        let evalValue;
+        try {
+            evalValue = Function(`'use strict'; return (${el.value})`)();
+        } catch {}
+
+        el.value = (Number.isFinite(evalValue) ? evalValue : 0).toString();
+    }
+  }
+
+  window.document.addEventListener('DOMContentLoaded', () => {
+    document.head.appendChild(document.createElement('style')).appendChild(document.createTextNode(css));
+    patchInputUpdateHandler();
+
+    const chatList = window.document.getElementById('mp-chat-list');
+    const rightPanel = window.document.getElementById('panel_right_blank');
+
+    // add the Join button to 'hosted map' chat messages
+    function handleChatMutation() {
       const latestMessage = chatList.children[chatList.children.length - 1];
 
       if (latestMessage.children.length === 2) { // not a system message
-
         const messageElement = latestMessage.children[1];
         const message = messageElement.innerHTML;
 
@@ -254,8 +287,7 @@
 
             const joinThisButton = document.createElement('button');
 
-            joinThisButton.setAttribute('style', joinButtonStyle);
-            joinThisButton.classList.add('eButton');
+            joinThisButton.classList.add('eButton', 'joinButton');
             joinThisButton.innerHTML = 'Join';
             messageElement.insertAdjacentElement('afterend', joinThisButton);
 
@@ -268,11 +300,40 @@
         }
 
       }
+    }
 
+    // change input types to text for transform input elements
+    function handleRightPanelMutation() {
+      if (!(
+        rightPanel &&
+        rightPanel.children &&
+        rightPanel.children.transformB &&
+        rightPanel.children.transformB.children
+      )) return;
+
+      rightPanel.children.transformB.children.forEach(child => {
+          if (child.className === 'vector3') child.children.forEach(subChild => {
+              subChild.type = 'text';
+          })
+      })
+    }
+
+    const observer = new MutationObserver((mutations) => {
+      const mutatedEl = mutations[0].target;
+      if (mutatedEl.id === chatList.id) {
+        handleChatMutation();
+      } else if (mutatedEl.id === rightPanel.id) {
+        handleRightPanelMutation(mutations);
+      }
     });
 
     observer.observe(
       chatList,
+      { attributes: true, childList: true, subtree: true }
+    );
+
+    observer.observe(
+      rightPanel,
       { attributes: true, childList: true, subtree: true }
     );
 
